@@ -1,4 +1,4 @@
-package com.kyosk;
+package com.kyosk.retailbackend;
 
 public class Main {
     public static void main(String[] args) {
