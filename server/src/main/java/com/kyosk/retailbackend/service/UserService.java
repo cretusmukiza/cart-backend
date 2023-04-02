@@ -61,6 +61,26 @@ public class UserService extends UserServiceGrpc.UserServiceImplBase {
 
     @Override
     public void authorizeUser(AuthorizeUserRequest request, StreamObserver<AuthorizeUserResponse> responseObserver) {
-        
+        AuthorizeUserResponse.Builder builder = AuthorizeUserResponse.newBuilder();
+        Optional<User> user  = this.userRepository.findByEmail(request.getEmail());
+        if(user.isPresent()) {
+            if(!this.bcryptGenerator.isValidPassword(request.getPassword(),user.get().getPassword())){
+                Status status =  Status.INVALID_ARGUMENT.withDescription("Credential do not match");
+                responseObserver.onError(status.asRuntimeException());
+                return;
+            }
+            else{
+                String token = this.jwtUtil.generateAccessToken(user.get());
+                builder.setAccessKey(token);
+            }
+        }
+        else{
+            Status status =  Status.NOT_FOUND.withDescription("User not found");
+            responseObserver.onError(status.asRuntimeException());
+            return;
+        }
+        responseObserver.onNext(builder.build());
+        responseObserver.onCompleted();
+
     }
 }
