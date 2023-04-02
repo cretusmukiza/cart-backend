@@ -1,11 +1,10 @@
 package com.kyosk.retailbackend.service;
 
-import com.kyosk.retailbackend.CreateUserRequest;
-import com.kyosk.retailbackend.CreateUserResponse;
-import com.kyosk.retailbackend.UserServiceGrpc;
+import com.kyosk.retailbackend.*;
 import com.kyosk.retailbackend.entity.User;
 import com.kyosk.retailbackend.repository.UserRepository;
 import com.kyosk.retailbackend.utils.BcryptGenerator;
+import com.kyosk.retailbackend.utils.JwtUtil;
 import com.kyosk.retailbackend.utils.TimeUtils;
 import io.grpc.Status;
 import io.grpc.stub.StreamObserver;
@@ -25,6 +24,9 @@ public class UserService extends UserServiceGrpc.UserServiceImplBase {
 
     @Autowired
     private TimeUtils timeUtils;
+
+    @Autowired
+    private JwtUtil jwtUtil;
 
     @Override
     public void createUser(CreateUserRequest request, StreamObserver<CreateUserResponse> responseObserver) {
@@ -55,5 +57,10 @@ public class UserService extends UserServiceGrpc.UserServiceImplBase {
 
         responseObserver.onNext(builder.build());
         responseObserver.onCompleted();
+    }
+
+    @Override
+    public void authorizeUser(AuthorizeUserRequest request, StreamObserver<AuthorizeUserResponse> responseObserver) {
+        
     }
 }
