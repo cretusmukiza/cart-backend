@@ -33,14 +33,14 @@ public class Product {
     @Column(nullable=false, length = 512)
     private String description;
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinColumn(name="product_id")
     private List<ProductAttribute> productAttributeList;
 
-    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY )
+    @OneToOne(cascade = CascadeType.ALL )
     private ProductPrice productPrice;
 
-    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY )
+    @OneToOne(cascade = CascadeType.ALL )
     private ProductInventory productInventory;
 
     @Column(name = "created_at")

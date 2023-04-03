@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @GrpcService
 public class ProductService extends RetailServiceGrpc.RetailServiceImplBase {
@@ -67,6 +68,17 @@ public class ProductService extends RetailServiceGrpc.RetailServiceImplBase {
 
         builder.setProduct(productResponseMapper.mapResponse(productSaved));
 
+        responseObserver.onNext(builder.build());
+        responseObserver.onCompleted();
+    }
+
+    @Override
+    public void getAllProducts(GetAllProductsRequest request, StreamObserver<GetAllProductsResponse> responseObserver) {
+        GetAllProductsResponse.Builder builder = GetAllProductsResponse.newBuilder();
+        List<ProductResponse>  productsResponse = this.productRepository.findAll().stream()
+                .map(product -> this.productResponseMapper.mapResponse(product))
+                .collect(Collectors.toList());
+        builder.addAllProducts(productsResponse);
         responseObserver.onNext(builder.build());
         responseObserver.onCompleted();
     }
