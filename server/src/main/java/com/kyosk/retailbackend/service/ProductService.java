@@ -106,4 +106,25 @@ public class ProductService extends RetailServiceGrpc.RetailServiceImplBase {
         responseObserver.onNext(builder.build());
         responseObserver.onCompleted();
     }
+
+    @Override
+    public void changeProductPrice(ChangeProductPriceRequest request, StreamObserver<ChangeProductPriceResponse> responseObserver) {
+        ChangeProductPriceResponse.Builder builder = ChangeProductPriceResponse.newBuilder();
+        Optional<Product> productOptional = this.productRepository.findById(request.getProductId());
+        if(productOptional.isPresent()){
+            Product product = productOptional.get();
+            ProductPrice productPrice = product.getProductPrice();
+            productPrice.setPrice(BigDecimal.valueOf(request.getNewPrice()));
+            product.setProductPrice(productPrice);
+            this.productRepository.save(product);
+            builder.setSuccess(true);
+        }
+        else {
+            Status status = Status.NOT_FOUND.withDescription("The product is not found");
+            responseObserver.onError(status.asRuntimeException());
+            return;
+        }
+        responseObserver.onNext(builder.build());
+        responseObserver.onCompleted();
+    }
 }
