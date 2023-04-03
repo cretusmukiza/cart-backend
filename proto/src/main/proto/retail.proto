@@ -77,13 +77,12 @@ message GetAllProductsResponse {
 
 
 message CreateProductRequest {
-  string product_code = 1;
-  string description = 2;
-  string image = 3;
-  float price = 4;
-  int64 quantity = 5;
-  int64 reorder_level = 6;
-  ProductAttributesFields product_attributes = 7;
+  string description = 1;
+  string image = 2;
+  float price = 3;
+  int64 quantity = 4;
+  int64 reorder_level = 5;
+  ProductAttributesFields product_attributes = 6;
 }
 
 message CreateProductResponse {
