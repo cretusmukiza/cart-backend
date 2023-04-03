@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -162,6 +163,27 @@ public class ProductService extends RetailServiceGrpc.RetailServiceImplBase {
         discount.setActive(true);
         Discount savedDiscount = this.discountRepository.save(discount);
         builder.setDiscount(discountResponseMapper.mapResponse(savedDiscount));
+        responseObserver.onNext(builder.build());
+        responseObserver.onCompleted();
+    }
+
+    @Override
+    public void getDiscount(GetDiscountRequest request, StreamObserver<GetDiscountResponse> responseObserver) {
+        GetDiscountResponse.Builder builder = GetDiscountResponse.newBuilder();
+        Optional<Discount> optionalDiscount;
+        if(request.hasDiscountId()){
+            optionalDiscount = this.discountRepository.findById(request.getDiscountId());
+            builder.setDiscount(this.discountResponseMapper.mapResponse(optionalDiscount.get()));
+        }
+        else if(request.hasCode()){
+            optionalDiscount = this.discountRepository.findByDiscountCode(request.getCode());
+            builder.setDiscount(this.discountResponseMapper.mapResponse(optionalDiscount.get()));
+        }
+        else {
+            Status status = Status.NOT_FOUND.withDescription("The discount is not found");
+            responseObserver.onError(status.asRuntimeException());
+            return;
+        }
         responseObserver.onNext(builder.build());
         responseObserver.onCompleted();
     }
