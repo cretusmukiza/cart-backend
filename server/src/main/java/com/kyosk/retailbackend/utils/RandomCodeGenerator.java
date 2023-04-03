@@ -29,7 +29,11 @@ public class RandomCodeGenerator {
         return sb.toString();
     }
     public String generateProductCode(){
-        return this.randomUUID(10, '\u0000', '\u0000');
+        return this.randomUUID(10, 2, '\u0000');
+    }
+
+    public String generateDiscountCode(){
+        return this.randomUUID(10, 3, '-');
     }
 
 

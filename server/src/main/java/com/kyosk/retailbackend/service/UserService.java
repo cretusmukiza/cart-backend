@@ -2,6 +2,7 @@ package com.kyosk.retailbackend.service;
 
 import com.kyosk.retailbackend.*;
 import com.kyosk.retailbackend.entity.User;
+import com.kyosk.retailbackend.repository.DiscountRepository;
 import com.kyosk.retailbackend.repository.UserRepository;
 import com.kyosk.retailbackend.utils.BcryptGenerator;
 import com.kyosk.retailbackend.utils.JwtUtil;
@@ -27,6 +28,9 @@ public class UserService extends UserServiceGrpc.UserServiceImplBase {
 
     @Autowired
     private JwtUtil jwtUtil;
+
+    @Autowired
+    private DiscountRepository discountRepository;
 
     @Override
     public void createUser(CreateUserRequest request, StreamObserver<CreateUserResponse> responseObserver) {
@@ -83,4 +87,6 @@ public class UserService extends UserServiceGrpc.UserServiceImplBase {
         responseObserver.onCompleted();
 
     }
+
+
 }

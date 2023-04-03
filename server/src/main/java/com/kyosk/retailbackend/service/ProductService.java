@@ -1,16 +1,16 @@
 package com.kyosk.retailbackend.service;
 
 import com.kyosk.retailbackend.*;
-import com.kyosk.retailbackend.entity.Product;
-import com.kyosk.retailbackend.entity.ProductAttribute;
-import com.kyosk.retailbackend.entity.ProductInventory;
-import com.kyosk.retailbackend.entity.ProductPrice;
+import com.kyosk.retailbackend.entity.*;
+import com.kyosk.retailbackend.mapper.DiscountResponseMapper;
 import com.kyosk.retailbackend.mapper.ProductResponseMapper;
+import com.kyosk.retailbackend.repository.DiscountRepository;
 import com.kyosk.retailbackend.repository.ProductRepository;
 import com.kyosk.retailbackend.utils.RandomCodeGenerator;
 import io.grpc.Status;
 import io.grpc.stub.StreamObserver;
 import net.devh.boot.grpc.server.service.GrpcService;
+import org.checkerframework.checker.units.qual.A;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.math.BigDecimal;
@@ -29,7 +29,13 @@ public class ProductService extends RetailServiceGrpc.RetailServiceImplBase {
     private ProductRepository productRepository;
 
     @Autowired
+    private DiscountRepository discountRepository;
+
+    @Autowired
     private ProductResponseMapper productResponseMapper;
+
+    @Autowired
+    private DiscountResponseMapper discountResponseMapper;
 
     @Override
     public void createProduct(CreateProductRequest request, StreamObserver<CreateProductResponse> responseObserver) {
@@ -141,6 +147,21 @@ public class ProductService extends RetailServiceGrpc.RetailServiceImplBase {
             responseObserver.onError(status.asRuntimeException());
             return;
         }
+        responseObserver.onNext(builder.build());
+        responseObserver.onCompleted();
+    }
+
+    @Override
+    public void createDiscount(CreateDiscountRequest request, StreamObserver<CreateDiscountResponse> responseObserver) {
+        CreateDiscountResponse.Builder builder = CreateDiscountResponse.newBuilder();
+        System.out.println(request.getDiscountType());
+        Discount discount = new Discount();
+        discount.setDiscountType(request.getDiscountType());
+        discount.setDiscountCode(this.randomCodeGenerator.generateDiscountCode());
+        discount.setDiscountValue(BigDecimal.valueOf(request.getDiscountValue()));
+        discount.setActive(true);
+        Discount savedDiscount = this.discountRepository.save(discount);
+        builder.setDiscount(discountResponseMapper.mapResponse(savedDiscount));
         responseObserver.onNext(builder.build());
         responseObserver.onCompleted();
     }

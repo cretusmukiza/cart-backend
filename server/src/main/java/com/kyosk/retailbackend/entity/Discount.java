@@ -1,5 +1,6 @@
 package com.kyosk.retailbackend.entity;
 
+import com.kyosk.retailbackend.DiscountType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -8,25 +9,31 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import javax.persistence.*;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name="product_attributes")
-public class ProductAttribute {
+@Table(name="discounts")
+public class Discount {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(nullable = false)
-    private String attributeKey;
+    private String discountCode;
 
-    @Column(nullable = false)
-    private String attributeValue;
+    @Enumerated(EnumType.STRING)
+    private DiscountType discountType;
+
+    @Column(nullable = false, precision = 7, scale = 2)
+    private BigDecimal discountValue;
+
+    @Column(nullable = false, columnDefinition = "TINYINT(1)")
+    private boolean active;
 
     @Column(name = "created_at")
     @CreationTimestamp
@@ -35,5 +42,4 @@ public class ProductAttribute {
     @Column(name = "updated_at")
     @UpdateTimestamp
     private LocalDateTime updatedAt;
-
 }
