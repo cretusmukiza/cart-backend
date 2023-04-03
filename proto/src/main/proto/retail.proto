@@ -9,6 +9,7 @@ import "user-service.proto";
 
 service RetailService {
   rpc GetAllProducts (GetAllProductsRequest) returns (GetAllProductsResponse);
+  rpc GetProduct (GetProductRequest) returns (GetProductResponse);
   rpc CreateProduct (CreateProductRequest) returns (CreateProductResponse);
   rpc AddProductQuantity (AddProductQuantityRequest) returns (AddProductQuantityResponse);
   rpc ChangeProductPrice (ChangeProductPriceRequest) returns (ChangeProductPriceResponse);
@@ -75,6 +76,14 @@ message GetAllProductsRequest {
 
 message GetAllProductsResponse {
   repeated ProductResponse products = 1;
+}
+
+message GetProductRequest {
+  int64 product_id = 1;
+}
+
+message GetProductResponse {
+  ProductResponse product = 1;
 }
 
 

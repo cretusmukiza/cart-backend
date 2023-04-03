@@ -127,4 +127,21 @@ public class ProductService extends RetailServiceGrpc.RetailServiceImplBase {
         responseObserver.onNext(builder.build());
         responseObserver.onCompleted();
     }
+
+    @Override
+    public void getProduct(GetProductRequest request, StreamObserver<GetProductResponse> responseObserver) {
+        GetProductResponse.Builder  builder = GetProductResponse.newBuilder();
+        Optional<Product> productOptional = this.productRepository.findById(request.getProductId());
+        if(productOptional.isPresent()){
+            Product product = productOptional.get();
+            builder.setProduct(this.productResponseMapper.mapResponse(product));
+        }
+        else {
+            Status status = Status.NOT_FOUND.withDescription("The product is not found");
+            responseObserver.onError(status.asRuntimeException());
+            return;
+        }
+        responseObserver.onNext(builder.build());
+        responseObserver.onCompleted();
+    }
 }
