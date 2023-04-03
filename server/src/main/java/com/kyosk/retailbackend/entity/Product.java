@@ -25,13 +25,20 @@ public class Product {
     private String name;
 
     @Column(nullable=false)
-    private String product_code;
+    private String productCode;
 
     @Column(nullable=false, length = 512)
     private String description;
 
-    @OneToMany(targetEntity = ProductAttribute.class, fetch = FetchType.LAZY)
-    private List<ProductAttribute> productAttributes;
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinColumn(name="product_id")
+    private List<ProductAttribute> productAttributeList;
+
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY )
+    private ProductPrice productPrice;
+
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY )
+    private ProductInventory productInventory;
 
     @Column(name = "created_at")
     @CreationTimestamp
