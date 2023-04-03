@@ -8,6 +8,7 @@ import com.kyosk.retailbackend.entity.ProductPrice;
 import com.kyosk.retailbackend.mapper.ProductResponseMapper;
 import com.kyosk.retailbackend.repository.ProductRepository;
 import com.kyosk.retailbackend.utils.RandomCodeGenerator;
+import io.grpc.Status;
 import io.grpc.stub.StreamObserver;
 import net.devh.boot.grpc.server.service.GrpcService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @GrpcService
@@ -79,6 +81,28 @@ public class ProductService extends RetailServiceGrpc.RetailServiceImplBase {
                 .map(product -> this.productResponseMapper.mapResponse(product))
                 .collect(Collectors.toList());
         builder.addAllProducts(productsResponse);
+        responseObserver.onNext(builder.build());
+        responseObserver.onCompleted();
+    }
+
+    @Override
+    public void addProductQuantity(AddProductQuantityRequest request, StreamObserver<AddProductQuantityResponse> responseObserver) {
+        AddProductQuantityResponse.Builder builder = AddProductQuantityResponse.newBuilder();
+        Optional<Product> productOptional = this.productRepository.findById(request.getProductId());
+        if(productOptional.isPresent()){
+            Product product = productOptional.get();
+            ProductInventory productInventory = product.getProductInventory();
+            productInventory.setQuantity((int) (productInventory.getQuantity() + request.getQuantity()));
+            product.setProductInventory(productInventory);
+            this.productRepository.save(product);
+            builder.setSuccess(true);
+        }
+        else {
+            Status status = Status.NOT_FOUND.withDescription("The product is not found");
+            responseObserver.onError(status.asRuntimeException());
+            return;
+        }
+
         responseObserver.onNext(builder.build());
         responseObserver.onCompleted();
     }

@@ -11,6 +11,7 @@ service RetailService {
   rpc GetAllProducts (GetAllProductsRequest) returns (GetAllProductsResponse);
   rpc CreateProduct (CreateProductRequest) returns (CreateProductResponse);
   rpc AddProductQuantity (AddProductQuantityRequest) returns (AddProductQuantityResponse);
+  rpc ChangeProductPrice (ChangeProductPriceRequest) returns (ChangeProductPriceResponse);
   rpc AddDiscountToProduct (AddDiscountToProductRequest) returns (AddDiscountToProductResponse);
   rpc DeactivateDiscount (DeactivateDiscountRequest) returns (DeactivateDiscountResponse);
 }
@@ -102,6 +103,15 @@ message AddProductQuantityRequest {
 }
 
 message AddProductQuantityResponse {
+  bool success = 1;
+}
+
+message ChangeProductPriceRequest {
+  int64 product_id = 1;
+  float new_price  = 2;
+}
+
+message ChangeProductPriceResponse {
   bool success = 1;
 }
 
