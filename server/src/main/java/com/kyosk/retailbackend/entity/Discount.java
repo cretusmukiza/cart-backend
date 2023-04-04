@@ -1,5 +1,9 @@
 package com.kyosk.retailbackend.entity;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import com.kyosk.retailbackend.DiscountType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -8,33 +12,35 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import javax.persistence.*;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Set;
 
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name="users")
-public class User {
+@Table(name="discounts")
+public class Discount {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(nullable = false)
-    private String firstName;
+    private String discountCode;
 
-    @Column(nullable = false)
-    private  String lastName;
+    @Enumerated(EnumType.STRING)
+    private DiscountType discountType;
 
-    @Column(nullable = false,unique = true)
-    private String email;
+    @Column(nullable = false, precision = 7, scale = 2)
+    private BigDecimal discountValue;
 
-    @Column(nullable = false)
-    private String phoneNumber;
+    @Column(nullable = false, columnDefinition = "TINYINT(1)")
+    private boolean active;
 
-    @Column(nullable = false)
-    private String password;
+    @ManyToMany(cascade = CascadeType.ALL, targetEntity = Product.class, mappedBy = "discounts")
+    private Set<Product> products = new HashSet<>();
 
     @Column(name = "created_at")
     @CreationTimestamp
@@ -43,12 +49,4 @@ public class User {
     @Column(name = "updated_at")
     @UpdateTimestamp
     private LocalDateTime updatedAt;
-
-    public User(String firstName, String lastName, String email, String phoneNumber, String password) {
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.email = email;
-        this.phoneNumber = phoneNumber;
-        this.password = password;
-    }
 }

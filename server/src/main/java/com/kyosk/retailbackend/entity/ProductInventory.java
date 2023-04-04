@@ -10,31 +10,26 @@ import org.hibernate.annotations.UpdateTimestamp;
 import javax.persistence.*;
 import java.time.LocalDateTime;
 
-@Getter
 @Setter
+@Getter
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name="users")
-public class User {
+@Table(name="product_inventories")
+public class ProductInventory {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
-    private String firstName;
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "product_id", referencedColumnName = "id")
+    private Product product;
 
     @Column(nullable = false)
-    private  String lastName;
-
-    @Column(nullable = false,unique = true)
-    private String email;
+    private Integer quantity;
 
     @Column(nullable = false)
-    private String phoneNumber;
-
-    @Column(nullable = false)
-    private String password;
+    private Integer reorderLevel;
 
     @Column(name = "created_at")
     @CreationTimestamp
@@ -43,12 +38,4 @@ public class User {
     @Column(name = "updated_at")
     @UpdateTimestamp
     private LocalDateTime updatedAt;
-
-    public User(String firstName, String lastName, String email, String phoneNumber, String password) {
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.email = email;
-        this.phoneNumber = phoneNumber;
-        this.password = password;
-    }
 }
