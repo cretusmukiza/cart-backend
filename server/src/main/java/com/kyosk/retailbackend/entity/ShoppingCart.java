@@ -35,6 +35,9 @@ public class ShoppingCart {
     @Column(name = "expires_at")
     private LocalDateTime expiresAt;
 
+    @ManyToOne(fetch = FetchType.EAGER)
+    private User user;
+
     @Column(name = "created_at")
     @CreationTimestamp
     private LocalDateTime createdAt;
