@@ -1,0 +1,124 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "com.kyosk.retailbackend";
+
+import "google/protobuf/timestamp.proto";
+import "user-service.proto";
+import "retail.proto";
+
+
+service CartService {
+  rpc AddItemToShoppingCart (AddItemToCartRequest) returns (AddItemToCartResponse);
+  rpc RemoveItemFromShoppingCart (RemoveItemFromShoppingCartRequest) returns (RemoveItemFromShoppingCartResponse);
+  rpc ModifyCartItemQuantities (ModifyCartItemQuantitiesRequest) returns (ModifyCartItemQuantitiesResponse);
+  rpc ViewShoppingCart (ViewShoppingCartRequest) returns (ViewShoppingCartResponse);
+  rpc CheckoutCart (CheckoutCartRequest) returns (CheckoutCartResponse);
+  rpc CancelOrder (CancelOrderRequest) returns (CancelOrderResponse);
+}
+
+message AddItemToCartRequest {
+  int64 product_id = 1;
+  int32 quantity = 2;
+  optional int64 discount_id = 3;
+}
+
+message AddItemToCartResponse {
+  ShoppingCartItemResponse item  = 1;
+}
+
+message ShoppingCartResponse {
+  int64 id = 1;
+  repeated ShoppingCartItemResponse items = 2;
+  ShoppingCartStatus status = 3;
+  google.protobuf.Timestamp expires_at = 4;
+}
+
+
+message ShoppingCartItemResponse {
+  int64 id = 1;
+  ProductResponse product = 2;
+  int32 quantity = 3;
+  optional DiscountResponse discount = 4;
+  google.protobuf.Timestamp created_at = 5;
+  google.protobuf.Timestamp updated_at = 6;
+}
+
+message RemoveItemFromShoppingCartRequest {
+  int64 cart_item_id = 1;
+}
+
+message RemoveItemFromShoppingCartResponse {
+  bool  success = 1;
+}
+
+message ModifyCartItemQuantitiesRequest {
+  int64 cart_item_id = 1;
+}
+
+message ModifyCartItemQuantitiesResponse {
+  ShoppingCartItemResponse item = 1;
+}
+
+message ViewShoppingCartRequest {
+
+}
+
+message ViewShoppingCartResponse {
+  ShoppingCartResponse shopping_cart = 1;
+}
+
+message CheckoutCartRequest {}
+
+message CheckoutCartResponse {
+  OrderResponse order = 1;
+}
+
+message OrderResponse {
+  int64 id = 1;
+  OrderStatus order_status = 2;
+  float grand_total = 3;
+  float discount_amount = 4;
+  float final_amount = 5;
+  repeated OrderItemResponse order_items = 6;
+  google.protobuf.Timestamp created_at = 7;
+}
+
+message OrderItemResponse {
+  int32 id = 1;
+  ProductResponse product = 2;
+  optional DiscountResponse discount = 3;
+  float price  = 4;
+  int32 quantity = 5;
+  float total_amount = 6;
+  float discount_amount = 7;
+  float final_amount = 8;
+  google.protobuf.Timestamp created_at = 9;
+  google.protobuf.Timestamp updated_at = 10;
+}
+
+message CancelOrderRequest {
+  int64 order_id = 1;
+  string message = 2;
+}
+
+message  CancelOrderResponse {
+  bool success = 1;
+}
+
+
+enum OrderStatus {
+  CREATED = 0;
+  CANCELLED  = 1;
+  FULFILLED = 2;
+}
+
+enum ShoppingCartStatus {
+  ACTIVE = 0;
+  CHECKOUT = 1;
+  EXPIRED = 2;
+}
+
+
+
+

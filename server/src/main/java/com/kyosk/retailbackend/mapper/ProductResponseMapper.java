@@ -1,9 +1,6 @@
 package com.kyosk.retailbackend.mapper;
 
-import com.kyosk.retailbackend.ProductAttributesResponse;
-import com.kyosk.retailbackend.ProductInventoryResponse;
-import com.kyosk.retailbackend.ProductPriceResponse;
-import com.kyosk.retailbackend.ProductResponse;
+import com.kyosk.retailbackend.*;
 import com.kyosk.retailbackend.entity.Product;
 import com.kyosk.retailbackend.entity.ProductAttribute;
 import com.kyosk.retailbackend.entity.ProductInventory;
@@ -12,6 +9,7 @@ import com.kyosk.retailbackend.utils.TimeUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -19,6 +17,9 @@ import java.util.stream.Collectors;
 public class ProductResponseMapper {
     @Autowired
     private TimeUtils timeUtils;
+
+    @Autowired
+    private DiscountResponseMapper discountResponseMapper;
 
     public ProductResponse mapResponse(Product product){
         ProductResponse.Builder  builder = ProductResponse.newBuilder();
@@ -41,6 +42,8 @@ public class ProductResponseMapper {
                 .setUpdatedAt(timeUtils.toGoogleTimestamp(productPrice.getUpdatedAt()));
 
         builder.setPrice(productPriceBuilder.build());
+
+        //
 
         // Build product inventory
         ProductInventoryResponse.Builder productInventoryResponse = ProductInventoryResponse.newBuilder();
@@ -65,6 +68,12 @@ public class ProductResponseMapper {
                     return productAttributesResponseItem.build();
                 }).collect(Collectors.toList());
         builder.addAllProductAttributes(productAttributesResponse);
+
+        // Build Discount response
+        List<DiscountResponse> discountResponse = product.getDiscounts().stream()
+                .map(discount-> this.discountResponseMapper.mapResponse(discount))
+                .collect(Collectors.toList());
+        builder.addAllDiscounts(discountResponse);
 
         return builder.build();
     }

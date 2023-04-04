@@ -242,4 +242,5 @@ public class ProductService extends RetailServiceGrpc.RetailServiceImplBase {
         responseObserver.onCompleted();;
 
     }
+
 }

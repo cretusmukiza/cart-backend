@@ -2,7 +2,9 @@ package com.kyosk.retailbackend.utils;
 
 import com.kyosk.retailbackend.entity.User;
 import com.kyosk.retailbackend.entity.UserSession;
+import com.kyosk.retailbackend.repository.UserRepository;
 import com.kyosk.retailbackend.repository.UserSessionRepository;
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,8 +12,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 @Component
 public class JwtUtil {
@@ -24,6 +25,9 @@ public class JwtUtil {
 
     @Autowired
     private UserSessionRepository userSessionRepository;
+
+    @Autowired
+    private UserRepository userRepository;
 
     @Autowired
     private TimeUtils timeUtils;
@@ -53,6 +57,19 @@ public class JwtUtil {
         this.userSessionRepository.save(userSession);
 
         return token;
+    }
 
+    public User getUserFromToken(String token) throws Exception {
+        Claims claims = Jwts.parser().setSigningKey(this.SECRET_KEY)
+                .parseClaimsJws(token).getBody();
+        Long userId = claims.get("userId", Long.class);
+        if(Objects.isNull(userId)){
+            throw new Exception("Token is invalid");
+        }
+        Optional<User> optionalUser = this.userRepository.findById(userId);
+        if(!optionalUser.isPresent()){
+            throw new Exception("User is not found");
+        }
+        return optionalUser.get();
     }
 }
