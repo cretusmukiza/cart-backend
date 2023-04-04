@@ -14,10 +14,7 @@ import org.checkerframework.checker.units.qual.A;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @GrpcService
@@ -186,5 +183,63 @@ public class ProductService extends RetailServiceGrpc.RetailServiceImplBase {
         }
         responseObserver.onNext(builder.build());
         responseObserver.onCompleted();
+    }
+
+    @Override
+    public void getAllDiscounts(GetAllDiscountsRequest request, StreamObserver<GetAllDiscountsResponse> responseObserver) {
+        GetAllDiscountsResponse.Builder builder = GetAllDiscountsResponse.newBuilder();
+        List<DiscountResponse> discountResponses = this.discountRepository.findAll().stream()
+                .map(discount -> this.discountResponseMapper.mapResponse(discount))
+                .collect(Collectors.toList());
+        builder.addAllDiscounts(discountResponses);
+        responseObserver.onNext(builder.build());
+        responseObserver.onCompleted();
+    }
+
+    @Override
+    public void deactivateDiscount(DeactivateDiscountRequest request, StreamObserver<DeactivateDiscountResponse> responseObserver) {
+        DeactivateDiscountResponse.Builder builder = DeactivateDiscountResponse.newBuilder();
+        Optional<Discount> discountOptional = this.discountRepository.findById(request.getDiscountId());
+        if(discountOptional.isPresent()){
+            Discount discount = discountOptional.get();
+            discount.setActive(true);
+            this.discountRepository.save(discount);
+            builder.setSuccess(true);
+        }
+        else {
+            Status status = Status.NOT_FOUND.withDescription("The discount is not found");
+            responseObserver.onError(status.asRuntimeException());
+            return;
+        }
+        responseObserver.onNext(builder.build());
+        responseObserver.onCompleted();
+
+    }
+
+    @Override
+    public void addDiscountToProduct(AddDiscountToProductRequest request, StreamObserver<AddDiscountToProductResponse> responseObserver) {
+        AddDiscountToProductResponse.Builder builder = AddDiscountToProductResponse.newBuilder();
+        Optional<Product> optionalProduct = this.productRepository.findById(request.getProductId());
+        Optional<Discount> optionalDiscount = this.discountRepository.findById(request.getDiscountId());
+        if(!optionalProduct.isPresent()){
+            Status status = Status.NOT_FOUND.withDescription("The product is not found");
+            responseObserver.onError(status.asRuntimeException());
+        }
+        else if(!optionalDiscount.isPresent()){
+            Status status = Status.NOT_FOUND.withDescription("The discount is not found");
+            responseObserver.onError(status.asRuntimeException());
+        }
+        else {
+            Product product = optionalProduct.get();
+            Discount discount = optionalDiscount.get();
+            Set<Discount> discounts = product.getDiscounts();
+            discounts.add(discount);
+            product.setDiscounts(discounts);
+            this.productRepository.save(product);
+            builder.setSuccess(true);
+            responseObserver.onNext(builder.build());
+        }
+        responseObserver.onCompleted();;
+
     }
 }

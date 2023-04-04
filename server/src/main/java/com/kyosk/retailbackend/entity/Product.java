@@ -9,7 +9,10 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -37,6 +40,9 @@ public class Product {
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinColumn(name="product_id")
     private List<ProductAttribute> productAttributeList;
+
+    @ManyToMany(targetEntity = Discount.class, cascade = CascadeType.ALL, fetch=FetchType.EAGER)
+    private Set<Discount> discounts = new HashSet<>();
 
     @OneToOne(cascade = CascadeType.ALL )
     private ProductPrice productPrice;

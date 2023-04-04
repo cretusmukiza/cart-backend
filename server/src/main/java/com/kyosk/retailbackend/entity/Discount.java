@@ -1,5 +1,8 @@
 package com.kyosk.retailbackend.entity;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
 import com.kyosk.retailbackend.DiscountType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -11,6 +14,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 import javax.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -34,6 +38,9 @@ public class Discount {
 
     @Column(nullable = false, columnDefinition = "TINYINT(1)")
     private boolean active;
+
+    @ManyToMany(cascade = CascadeType.ALL, targetEntity = Product.class, mappedBy = "discounts")
+    private Set<Product> products = new HashSet<>();
 
     @Column(name = "created_at")
     @CreationTimestamp
