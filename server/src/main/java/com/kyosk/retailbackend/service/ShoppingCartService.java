@@ -9,6 +9,7 @@ import com.kyosk.retailbackend.mapper.ShoppingCartItemResponseMapper;
 import com.kyosk.retailbackend.mapper.ShoppingCartResponseMapper;
 import com.kyosk.retailbackend.repository.DiscountRepository;
 import com.kyosk.retailbackend.repository.ProductRepository;
+import com.kyosk.retailbackend.repository.ShoppingCartItemRepository;
 import com.kyosk.retailbackend.repository.ShoppingCartRepository;
 import io.grpc.Status;
 import io.grpc.stub.StreamObserver;
@@ -39,6 +40,9 @@ public class ShoppingCartService extends CartServiceGrpc.CartServiceImplBase {
 
     @Autowired
     private ShoppingCartResponseMapper shoppingCartResponseMapper;
+
+    @Autowired
+    private ShoppingCartItemRepository shoppingCartItemRepository;
 
     @Override
     public void addItemToShoppingCart(AddItemToCartRequest request,
@@ -142,6 +146,49 @@ public class ShoppingCartService extends CartServiceGrpc.CartServiceImplBase {
         }
         responseObserver.onCompleted();
 
+    }
+
+    @Override
+    public void modifyCartItemQuantities(ModifyCartItemQuantitiesRequest request, StreamObserver<ModifyCartItemQuantitiesResponse> responseObserver) {
+        ModifyCartItemQuantitiesResponse.Builder builder = ModifyCartItemQuantitiesResponse.newBuilder();
+        Optional<ShoppingCartItem> shoppingCartItemOptional = this.shoppingCartItemRepository
+                .findById(request.getCartItemId());
+        if(shoppingCartItemOptional.isPresent()){
+            ShoppingCartItem shoppingCartItem = shoppingCartItemOptional.get();
+            Product product = shoppingCartItem.getProduct();
+            if(product.getProductInventory().getQuantity() < request.getQuantity()){
+                Status status = Status.NOT_FOUND.withDescription("The requested quantity is not available");
+                responseObserver.onError(status.asRuntimeException());
+            }
+            shoppingCartItem.setQuantity(request.getQuantity());
+            ShoppingCartItem savedShoppingCartItem = this.shoppingCartItemRepository.save(shoppingCartItem);
+            builder.setItem(this.shoppingCartItemResponseMapper.mapResponse(savedShoppingCartItem));
+            responseObserver.onNext(builder.build());
+
+        }
+        else{
+            Status status = Status.NOT_FOUND.withDescription("The shopping cart item is not found");
+            responseObserver.onError(status.asRuntimeException());
+        }
+        responseObserver.onCompleted();
+
+    }
+
+    @Override
+    public void removeItemFromShoppingCart(RemoveItemFromShoppingCartRequest request, StreamObserver<RemoveItemFromShoppingCartResponse> responseObserver) {
+        RemoveItemFromShoppingCartResponse.Builder builder = RemoveItemFromShoppingCartResponse.newBuilder();
+        Optional<ShoppingCartItem> shoppingCartItemOptional = this.shoppingCartItemRepository
+                .findById(request.getCartItemId());
+        if(shoppingCartItemOptional.isPresent()){
+            this.shoppingCartItemRepository.deleteById(request.getCartItemId());
+            builder.setSuccess(true);
+            responseObserver.onNext(builder.build());
+        }
+        else {
+            Status status = Status.NOT_FOUND.withDescription("The shopping cart item is not found");
+            responseObserver.onError(status.asRuntimeException());
+        }
+        responseObserver.onCompleted();
     }
 
     @Override

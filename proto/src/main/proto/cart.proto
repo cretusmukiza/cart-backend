@@ -54,6 +54,7 @@ message RemoveItemFromShoppingCartResponse {
 
 message ModifyCartItemQuantitiesRequest {
   int64 cart_item_id = 1;
+  int32 quantity = 2;
 }
 
 message ModifyCartItemQuantitiesResponse {
