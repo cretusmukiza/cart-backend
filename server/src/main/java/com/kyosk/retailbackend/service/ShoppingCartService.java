@@ -46,6 +46,14 @@ public class ShoppingCartService extends CartServiceGrpc.CartServiceImplBase {
         AddItemToCartResponse.Builder builder = AddItemToCartResponse.newBuilder();
         Optional<Product> optionalProduct = this.productRepository.findById(request.getProductId());
         if(optionalProduct.isPresent()){
+            Product product = optionalProduct.get();
+
+            // Check if the quantity is available
+            if(product.getProductInventory().getQuantity() < request.getQuantity()){
+                Status status = Status.NOT_FOUND.withDescription("The requested quantity is not available");
+                responseObserver.onError(status.asRuntimeException());
+            }
+
             // Get user active shopping cart
             User user = AuthConstant.AUTHORIZED_USER.get();
             List<ShoppingCart> shoppingCartList = user.getShoppingCartList();
@@ -85,7 +93,6 @@ public class ShoppingCartService extends CartServiceGrpc.CartServiceImplBase {
 
             // Create shopping cart item
             ShoppingCartItem shoppingCartItem = new ShoppingCartItem();
-            Product product = optionalProduct.get();
             shoppingCartItem.setProduct(product);
             shoppingCartItem.setQuantity(request.getQuantity());
             if(request.hasDiscountId()){
