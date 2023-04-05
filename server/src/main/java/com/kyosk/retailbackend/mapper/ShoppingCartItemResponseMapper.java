@@ -1,6 +1,6 @@
 package com.kyosk.retailbackend.mapper;
 
-import com.kyosk.retailbackend.AddItemToCartResponse;
+
 import com.kyosk.retailbackend.ShoppingCartItemResponse;
 import com.kyosk.retailbackend.entity.ShoppingCartItem;
 import com.kyosk.retailbackend.utils.TimeUtils;

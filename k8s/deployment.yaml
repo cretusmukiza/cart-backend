@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: retail-backend
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: retail-backend
+  template:
+    metadata:
+      labels:
+        app: retail-backend
+    spec:
+      containers:
+      - name: retail-backend
+        # Will be swapped with private image hosted in private registry such as GCP Container registry or ECR
+        image: troy12/app-retail-backend
+        ports:
+          - containerPort: 9090
+        env:
+          - name: SPRING_DATASOURCE_URL
+            value: jdbc:mysql://mysql:3306/retail
+          - name: SPRING_DATASOURCE_USERNAME
+            valueFrom:
+              secretKeyRef:
+                name: database-credentials
+                key: user
+          - name: SPRING_DATASOURCE_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: database-credentials
+                key: password
+          - name: JWT_EXPIRATION_IN_HOURS
+            valueFrom:
+              secretKeyRef:
+                name: jwt-secret
+                key: secret
+          - name: JWT_SECRET
+            valueFrom:
+              secretKeyRef:
+                name: jwt-secret
+                key: expire-time
+
