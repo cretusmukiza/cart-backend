@@ -8,6 +8,7 @@
         <version>0.0.1-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
+    <packaging>jar</packaging>
 
     <artifactId>proto</artifactId>
 
@@ -65,6 +66,7 @@
                     <pluginArtifact>
                         io.grpc:protoc-gen-grpc-java:1.47.0:exe:${os.detected.classifier}
                     </pluginArtifact>
+                    <clearOutputDirectory>false</clearOutputDirectory>
                     <protoSourceRoot>
                         ${basedir}/src/main/proto/
                     </protoSourceRoot>
