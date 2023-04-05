@@ -4,12 +4,15 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.annotations.*;
 
 import javax.persistence.*;
+import javax.persistence.CascadeType;
+import javax.persistence.Entity;
+import javax.persistence.Table;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -31,7 +34,6 @@ public class User {
     @Column(nullable = false,unique = true)
     private String email;
 
-
     @Column(nullable = false)
     private String phoneNumber;
 
@@ -41,6 +43,11 @@ public class User {
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     private List<ShoppingCart> shoppingCartList;
+
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @JoinColumn(name = "user_id", referencedColumnName = "id")
+    @Fetch(value = FetchMode.SUBSELECT)
+    private List<Order> orders; ;
 
     @Column(name = "created_at")
     @CreationTimestamp

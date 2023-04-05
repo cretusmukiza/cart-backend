@@ -15,23 +15,19 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name="shopping_cart_items")
-public class ShoppingCartItem {
+@Table(name="cancelled_orders")
+public class CancelOrder {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "product_id", referencedColumnName = "id")
-    private Product product;
+    @OneToOne(cascade = CascadeType.MERGE)
+    @JoinColumn(name="order_id", referencedColumnName ="id" )
+    private Order order;
 
-    @Column(nullable = false)
-    private Integer quantity;
-
-    @OneToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "discount_id", referencedColumnName = "id")
-    private Discount discount;
+    @Column(nullable = false, length = 512)
+    private String reason;
 
     @Column(name = "created_at")
     @CreationTimestamp
