@@ -19,6 +19,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @GrpcService(interceptors = {AuthInterceptor.class})
 public class ShoppingCartService extends CartServiceGrpc.CartServiceImplBase {
@@ -46,6 +47,9 @@ public class ShoppingCartService extends CartServiceGrpc.CartServiceImplBase {
 
     @Autowired
     private OrderResponseMapper orderResponseMapper;
+
+    @Autowired
+    private  UserRepository userRepository;
 
     @Override
     public void addItemToShoppingCart(AddItemToCartRequest request,
@@ -198,6 +202,7 @@ public class ShoppingCartService extends CartServiceGrpc.CartServiceImplBase {
     public void checkoutCart(CheckoutCartRequest request, StreamObserver<CheckoutCartResponse> responseObserver) {
         CheckoutCartResponse.Builder builder = CheckoutCartResponse.newBuilder();
         Optional<ShoppingCart> optionalShoppingCart = this.shoppingCartRepository.findById(request.getCartId());
+        User user = AuthConstant.AUTHORIZED_USER.get();
         if(optionalShoppingCart.isPresent()){
             ShoppingCart shoppingCart = optionalShoppingCart.get();
             Status status;
@@ -259,7 +264,15 @@ public class ShoppingCartService extends CartServiceGrpc.CartServiceImplBase {
                 order.setStatus(OrderStatus.CREATED);
                 shoppingCart.setStatus(ShoppingCartStatus.CHECKOUT);
                 this.shoppingCartRepository.save(shoppingCart);
-                Order savedOrder = this.orderRepository.save(order);
+                List<Order> orders = user.getOrders();
+                if(orders == null){
+                    orders = new ArrayList<>();
+                }
+                orders.add(order);
+                user.setOrders(orders);
+                User savedUser = this.userRepository.save(user);
+                List<Order> savedOrders = savedUser.getOrders();
+                Order savedOrder = savedOrders.get(savedOrders.size() -1 );
                 builder.setOrder(this.orderResponseMapper.mapResponse(savedOrder));
                 responseObserver.onNext(builder.build());
             }

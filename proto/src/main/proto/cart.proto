@@ -14,6 +14,7 @@ service CartService {
   rpc ModifyCartItemQuantities (ModifyCartItemQuantitiesRequest) returns (ModifyCartItemQuantitiesResponse);
   rpc ViewShoppingCart (ViewShoppingCartRequest) returns (ViewShoppingCartResponse);
   rpc CheckoutCart (CheckoutCartRequest) returns (CheckoutCartResponse);
+  rpc ViewOrders (ViewOrdersRequest) returns (ViewOrdersResponse);
   rpc CancelOrder (CancelOrderRequest) returns (CancelOrderResponse);
 }
 
@@ -98,6 +99,14 @@ message OrderItemResponse {
   float final_amount = 8;
   google.protobuf.Timestamp created_at = 9;
   google.protobuf.Timestamp updated_at = 10;
+}
+
+message ViewOrdersRequest {
+
+}
+
+message ViewOrdersResponse {
+  OrderResponse orders = 1;
 }
 
 message CancelOrderRequest {
