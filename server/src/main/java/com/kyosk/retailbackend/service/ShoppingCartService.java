@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @GrpcService(interceptors = {AuthInterceptor.class})
 public class ShoppingCartService extends CartServiceGrpc.CartServiceImplBase {
@@ -50,6 +51,9 @@ public class ShoppingCartService extends CartServiceGrpc.CartServiceImplBase {
 
     @Autowired
     private  UserRepository userRepository;
+
+    @Autowired
+    private  CancelledOrderRepository cancelledOrderRepository;
 
     @Override
     public void addItemToShoppingCart(AddItemToCartRequest request,
@@ -287,11 +291,39 @@ public class ShoppingCartService extends CartServiceGrpc.CartServiceImplBase {
     }
 
     @Override
+    public void viewOrders(ViewOrdersRequest request, StreamObserver<ViewOrdersResponse> responseObserver) {
+        ViewOrdersResponse.Builder builder = ViewOrdersResponse.newBuilder();
+        User user = AuthConstant.AUTHORIZED_USER.get();
+        List<Order> orders = user.getOrders();
+        builder.addAllOrders(orders.stream().map(order -> this.orderResponseMapper.mapResponse(order)).collect(Collectors.toList()));
+        responseObserver.onNext(builder.build());
+        responseObserver.onCompleted();
+    }
+
+    @Override
     public void cancelOrder(CancelOrderRequest request, StreamObserver<CancelOrderResponse> responseObserver) {
         CancelOrderResponse.Builder builder = CancelOrderResponse.newBuilder();
-        User user = AuthConstant.AUTHORIZED_USER.get();
-        builder.setSuccess(true);
-        responseObserver.onNext(builder.build());
+        Optional<Order> optionalOrder = this.orderRepository.findById(request.getOrderId());
+        if(optionalOrder.isPresent()){
+            Order order = optionalOrder.get();
+            OrderStatus orderStatus = order.getStatus();
+            if(orderStatus.equals(OrderStatus.FULFILLED) || orderStatus.equals(OrderStatus.CANCELLED)){
+                Status status = Status.NOT_FOUND.withDescription("The order cannot be cancelled");
+                responseObserver.onError(status.asRuntimeException());
+            }
+            else {
+                CancelOrder cancelOrder = new CancelOrder();
+                cancelOrder.setReason(request.getMessage());
+                cancelOrder.setOrder(order);
+                this.cancelledOrderRepository.save(cancelOrder);
+                builder.setSuccess(true);
+                responseObserver.onNext(builder.build());
+            }
+        }
+        else{
+            Status status = Status.NOT_FOUND.withDescription("The order is not found");
+            responseObserver.onError(status.asRuntimeException());
+        }
         responseObserver.onCompleted();
     }
 }

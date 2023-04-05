@@ -106,7 +106,7 @@ message ViewOrdersRequest {
 }
 
 message ViewOrdersResponse {
-  OrderResponse orders = 1;
+  repeated OrderResponse orders = 1;
 }
 
 message CancelOrderRequest {
