@@ -69,7 +69,9 @@ message ViewShoppingCartResponse {
   ShoppingCartResponse shopping_cart = 1;
 }
 
-message CheckoutCartRequest {}
+message CheckoutCartRequest {
+  int64 cart_id = 1;
+}
 
 message CheckoutCartResponse {
   OrderResponse order = 1;
@@ -86,7 +88,7 @@ message OrderResponse {
 }
 
 message OrderItemResponse {
-  int32 id = 1;
+  int64 id = 1;
   ProductResponse product = 2;
   optional DiscountResponse discount = 3;
   float price  = 4;

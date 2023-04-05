@@ -5,19 +5,16 @@ import com.kyosk.retailbackend.constants.AuthConstant;
 import com.kyosk.retailbackend.entity.*;
 import com.kyosk.retailbackend.entity.User;
 import com.kyosk.retailbackend.interceptor.AuthInterceptor;
+import com.kyosk.retailbackend.mapper.OrderResponseMapper;
 import com.kyosk.retailbackend.mapper.ShoppingCartItemResponseMapper;
 import com.kyosk.retailbackend.mapper.ShoppingCartResponseMapper;
-import com.kyosk.retailbackend.repository.DiscountRepository;
-import com.kyosk.retailbackend.repository.ProductRepository;
-import com.kyosk.retailbackend.repository.ShoppingCartItemRepository;
-import com.kyosk.retailbackend.repository.ShoppingCartRepository;
+import com.kyosk.retailbackend.repository.*;
 import io.grpc.Status;
 import io.grpc.stub.StreamObserver;
 import net.devh.boot.grpc.server.service.GrpcService;
-import org.checkerframework.checker.units.qual.A;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -43,6 +40,12 @@ public class ShoppingCartService extends CartServiceGrpc.CartServiceImplBase {
 
     @Autowired
     private ShoppingCartItemRepository shoppingCartItemRepository;
+
+    @Autowired
+    private OrderRepository orderRepository;
+
+    @Autowired
+    private OrderResponseMapper orderResponseMapper;
 
     @Override
     public void addItemToShoppingCart(AddItemToCartRequest request,
@@ -191,7 +194,84 @@ public class ShoppingCartService extends CartServiceGrpc.CartServiceImplBase {
         responseObserver.onCompleted();
     }
 
+    @Override
+    public void checkoutCart(CheckoutCartRequest request, StreamObserver<CheckoutCartResponse> responseObserver) {
+        CheckoutCartResponse.Builder builder = CheckoutCartResponse.newBuilder();
+        Optional<ShoppingCart> optionalShoppingCart = this.shoppingCartRepository.findById(request.getCartId());
+        if(optionalShoppingCart.isPresent()){
+            ShoppingCart shoppingCart = optionalShoppingCart.get();
+            Status status;
+            if(shoppingCart.getStatus().equals(ShoppingCartStatus.EXPIRED)){
+                status = Status.INVALID_ARGUMENT.withDescription("The shopping cart has expired");
+                responseObserver.onError(status.asRuntimeException());
+            }
+            else if(shoppingCart.getStatus().equals(ShoppingCartStatus.CHECKOUT)){
+                status = Status.INVALID_ARGUMENT.withDescription("The shopping cart has already been checked out");
+                responseObserver.onError(status.asRuntimeException());
+            }
+            else {
+                List<OrderItem> orderItemList = new ArrayList<>();
+                BigDecimal grandTotal = new BigDecimal(0);
+                BigDecimal grandDiscountAmount = new BigDecimal(0);
+                BigDecimal grandFinalAmount = new BigDecimal(0);
+                for(ShoppingCartItem shoppingCartItem: shoppingCart.getShoppingCartItems()){
+                    OrderItem item = new OrderItem();
+                    Product product = shoppingCartItem.getProduct();
+                    BigDecimal price = product.getProductPrice().getPrice();
+                    int quantity = shoppingCartItem.getQuantity();
+                    BigDecimal discountInAmount = new BigDecimal(0);
+                    // Calculate discount
+                    if(shoppingCartItem.getDiscount() != null){
+                        Discount discount = shoppingCartItem.getDiscount();
+                        BigDecimal discountValue = discount.getDiscountValue();
+                        DiscountType discountType = discount.getDiscountType();
+                        if(discountType.equals(DiscountType.AMOUNT)){
+                            discountInAmount = discountValue.multiply(new BigDecimal(quantity));
+                            item.setDiscountAmount(discountInAmount);
+                        }
+                        if(discount.getDiscountType().equals(DiscountType.PERCENT)){
+                            BigDecimal discountAmount = price.multiply(discountValue.divide(new BigDecimal(100)));
+                            discountInAmount = discountAmount.multiply(new BigDecimal(quantity));
+                            item.setDiscountAmount(discountInAmount);
+                        }
+                        grandDiscountAmount = grandDiscountAmount.add(discountInAmount);
+                        item.setDiscount(shoppingCartItem.getDiscount());
+                    }
 
+
+                    BigDecimal totalAmount = price.multiply(new BigDecimal(quantity));
+                    BigDecimal finaAmount = totalAmount.subtract(discountInAmount);
+                    grandFinalAmount =grandFinalAmount.add(finaAmount);
+                    grandTotal = grandTotal.add(totalAmount);
+                    item.setProduct(product);
+                    item.setPrice(price);
+                    item.setQuantity(quantity);
+                    item.setTotalAmount(totalAmount);
+                    item.setFinalAmount(finaAmount);
+                    orderItemList.add(item);
+                }
+
+                Order order = new Order();
+                order.setOrderItemList(orderItemList);
+                order.setGrandTotal(grandTotal);
+                order.setDiscountAmount(grandDiscountAmount);
+                order.setFinalAmount(grandFinalAmount);
+                order.setStatus(OrderStatus.CREATED);
+                shoppingCart.setStatus(ShoppingCartStatus.CHECKOUT);
+                this.shoppingCartRepository.save(shoppingCart);
+                Order savedOrder = this.orderRepository.save(order);
+                builder.setOrder(this.orderResponseMapper.mapResponse(savedOrder));
+                responseObserver.onNext(builder.build());
+            }
+
+        }
+        else{
+            Status status = Status.NOT_FOUND.withDescription("The shopping cart is not found");
+            responseObserver.onError(status.asRuntimeException());
+        }
+        responseObserver.onCompleted();
+
+    }
 
     @Override
     public void cancelOrder(CancelOrderRequest request, StreamObserver<CancelOrderResponse> responseObserver) {
