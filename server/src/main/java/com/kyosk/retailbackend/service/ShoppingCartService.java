@@ -9,6 +9,7 @@ import com.kyosk.retailbackend.mapper.OrderResponseMapper;
 import com.kyosk.retailbackend.mapper.ShoppingCartItemResponseMapper;
 import com.kyosk.retailbackend.mapper.ShoppingCartResponseMapper;
 import com.kyosk.retailbackend.repository.*;
+import com.kyosk.retailbackend.utils.PriceUtil;
 import io.grpc.Status;
 import io.grpc.stub.StreamObserver;
 import net.devh.boot.grpc.server.service.GrpcService;
@@ -54,6 +55,9 @@ public class ShoppingCartService extends CartServiceGrpc.CartServiceImplBase {
 
     @Autowired
     private  CancelledOrderRepository cancelledOrderRepository;
+
+    @Autowired
+    private PriceUtil priceUtil;
 
     @Override
     public void addItemToShoppingCart(AddItemToCartRequest request,
@@ -223,28 +227,44 @@ public class ShoppingCartService extends CartServiceGrpc.CartServiceImplBase {
                 BigDecimal grandTotal = new BigDecimal(0);
                 BigDecimal grandDiscountAmount = new BigDecimal(0);
                 BigDecimal grandFinalAmount = new BigDecimal(0);
+                List<Product> productUpdates = new ArrayList<>();
                 for(ShoppingCartItem shoppingCartItem: shoppingCart.getShoppingCartItems()){
                     OrderItem item = new OrderItem();
                     Product product = shoppingCartItem.getProduct();
                     BigDecimal price = product.getProductPrice().getPrice();
                     int quantity = shoppingCartItem.getQuantity();
+
+                    //Check if the product quantity is sufficient
+                    int existingProductQuantity = product.getProductInventory().getQuantity();
+                    if(quantity > existingProductQuantity ){
+                        Status errorStatus = Status.FAILED_PRECONDITION
+                                .withDescription("No enough quantity in stock");
+                        responseObserver.onError(errorStatus.asRuntimeException());
+                    }
+                    // Deduct product quantity
+                    product.getProductInventory().setQuantity(existingProductQuantity- quantity);
+                    productUpdates.add(product);
+
                     BigDecimal discountInAmount = new BigDecimal(0);
                     // Calculate discount
                     if(shoppingCartItem.getDiscount() != null){
                         Discount discount = shoppingCartItem.getDiscount();
-                        BigDecimal discountValue = discount.getDiscountValue();
-                        DiscountType discountType = discount.getDiscountType();
-                        if(discountType.equals(DiscountType.AMOUNT)){
-                            discountInAmount = discountValue.multiply(new BigDecimal(quantity));
-                            item.setDiscountAmount(discountInAmount);
+                        // Check if the discount is active
+                        if(discount.isActive()) {
+                            BigDecimal discountValue = discount.getDiscountValue();
+                            DiscountType discountType = discount.getDiscountType();
+                            if (discountType.equals(DiscountType.AMOUNT)) {
+                                discountInAmount = discountValue.multiply(new BigDecimal(quantity));
+                                item.setDiscountAmount(discountInAmount);
+                            }
+                            if (discount.getDiscountType().equals(DiscountType.PERCENT)) {
+                                BigDecimal discountAmount = price.multiply(discountValue.divide(new BigDecimal(100)));
+                                discountInAmount = discountAmount.multiply(new BigDecimal(quantity));
+                                item.setDiscountAmount(this.priceUtil.sanitizePrice(discountInAmount));
+                            }
+                            grandDiscountAmount = grandDiscountAmount.add(discountInAmount);
+                            item.setDiscount(shoppingCartItem.getDiscount());
                         }
-                        if(discount.getDiscountType().equals(DiscountType.PERCENT)){
-                            BigDecimal discountAmount = price.multiply(discountValue.divide(new BigDecimal(100)));
-                            discountInAmount = discountAmount.multiply(new BigDecimal(quantity));
-                            item.setDiscountAmount(discountInAmount);
-                        }
-                        grandDiscountAmount = grandDiscountAmount.add(discountInAmount);
-                        item.setDiscount(shoppingCartItem.getDiscount());
                     }
 
 
@@ -255,19 +275,17 @@ public class ShoppingCartService extends CartServiceGrpc.CartServiceImplBase {
                     item.setProduct(product);
                     item.setPrice(price);
                     item.setQuantity(quantity);
-                    item.setTotalAmount(totalAmount);
-                    item.setFinalAmount(finaAmount);
+                    item.setTotalAmount(this.priceUtil.sanitizePrice(totalAmount));
+                    item.setFinalAmount(this.priceUtil.sanitizePrice(finaAmount));
                     orderItemList.add(item);
                 }
-
                 Order order = new Order();
                 order.setOrderItemList(orderItemList);
-                order.setGrandTotal(grandTotal);
-                order.setDiscountAmount(grandDiscountAmount);
-                order.setFinalAmount(grandFinalAmount);
+                order.setGrandTotal(this.priceUtil.sanitizePrice(grandTotal));
+                order.setDiscountAmount(this.priceUtil.sanitizePrice(grandDiscountAmount));
+                order.setFinalAmount(this.priceUtil.sanitizePrice(grandFinalAmount));
                 order.setStatus(OrderStatus.CREATED);
-                shoppingCart.setStatus(ShoppingCartStatus.CHECKOUT);
-                this.shoppingCartRepository.save(shoppingCart);
+                this.productRepository.saveAll(productUpdates);
                 List<Order> orders = user.getOrders();
                 if(orders == null){
                     orders = new ArrayList<>();
@@ -278,6 +296,8 @@ public class ShoppingCartService extends CartServiceGrpc.CartServiceImplBase {
                 List<Order> savedOrders = savedUser.getOrders();
                 Order savedOrder = savedOrders.get(savedOrders.size() -1 );
                 builder.setOrder(this.orderResponseMapper.mapResponse(savedOrder));
+                shoppingCart.setStatus(ShoppingCartStatus.CHECKOUT);
+                this.shoppingCartRepository.save(shoppingCart);
                 responseObserver.onNext(builder.build());
             }
 

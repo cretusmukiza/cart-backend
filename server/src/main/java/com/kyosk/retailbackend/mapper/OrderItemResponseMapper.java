@@ -31,9 +31,11 @@ public class OrderItemResponseMapper {
         }
         builder.setPrice(this.priceUtil.toFloat(orderItem.getPrice()))
                 .setQuantity(orderItem.getQuantity())
-                .setTotalAmount(this.priceUtil.toFloat(orderItem.getTotalAmount()))
-                .setDiscountAmount(this.priceUtil.toFloat(orderItem.getDiscountAmount()))
-                .setFinalAmount(this.priceUtil.toFloat(orderItem.getFinalAmount()))
+                .setTotalAmount(this.priceUtil.toFloat(orderItem.getTotalAmount()));
+        if(orderItem.getDiscountAmount() != null){
+            builder.setDiscountAmount(this.priceUtil.toFloat(orderItem.getDiscountAmount()));
+        }
+        builder.setFinalAmount(this.priceUtil.toFloat(orderItem.getFinalAmount()))
                 .setCreatedAt(this.timeUtils.toGoogleTimestamp(orderItem.getCreatedAt()))
                 .setUpdatedAt(this.timeUtils.toGoogleTimestamp(orderItem.getUpdatedAt()));
 

@@ -22,7 +22,7 @@ public class ProductPrice {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(precision = 7, scale = 2)
+    @Column(precision = 16, scale = 2)
     private BigDecimal price;
 
     @OneToOne(cascade = CascadeType.ALL)
