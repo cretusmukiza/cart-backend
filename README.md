@@ -42,7 +42,16 @@ mvn package
 ```shell
 docker-compose up --build
 ```
-- The app will start on port 9090 add the postman collection, import the api definition and test the app on port 9090.
+- The app will start on port 9090 add the postman collection, import the api definition and
+test the app on localhost:9090.
+- Use the use example message button to generate sample message and replace the generate values
+ with relevant values for given fields.
+- All the methods in the CartService are limited to authorized users.
+- To use them first register the user using the AuthService ``createUser`` method.
+- Use the register credential to get the token using AuthService ``authorizeUser`` method.
+- Pass the token in the metadata with the key ``client-token``
+- The rest of the methods are not authorized  were meant for admin are meant to be deployed as internal APIs.
+
 
 ## Deploying the application to kubernetes
 
