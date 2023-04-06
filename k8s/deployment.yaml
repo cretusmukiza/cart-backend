@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: retail-backend
 spec:
-  replicas: 3
+  replicas: 1
   selector:
     matchLabels:
       app: retail-backend
@@ -20,25 +20,18 @@ spec:
           - containerPort: 9090
         env:
           - name: SPRING_DATASOURCE_URL
-            value: jdbc:mysql://mysql:3306/retail
+            value: jdbc:mysql://mysql:3306/retail?createDatabaseIfNotExist=true
           - name: SPRING_DATASOURCE_USERNAME
-            valueFrom:
-              secretKeyRef:
-                name: database-credentials
-                key: user
+            value: root
           - name: SPRING_DATASOURCE_PASSWORD
             valueFrom:
               secretKeyRef:
                 name: database-credentials
                 key: password
           - name: JWT_EXPIRATION_IN_HOURS
-            valueFrom:
-              secretKeyRef:
-                name: jwt-secret
-                key: secret
+            value: '24'
           - name: JWT_SECRET
             valueFrom:
               secretKeyRef:
                 name: jwt-secret
-                key: expire-time
-
+                key: jwt-secret-key
