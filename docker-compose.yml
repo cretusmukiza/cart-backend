@@ -24,7 +24,7 @@ services:
       # Where our data will be persisted
     volumes:
       - database:/var/lib/mysql
-      #- ./init/data.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./init/data.sql:/docker-entrypoint-initdb.d/init.sql
     networks:
       - retail-network
   server:

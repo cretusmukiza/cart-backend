@@ -4,7 +4,7 @@
 -- https://tableplus.com/
 --
 -- Database: retail
--- Generation Time: 2023-04-06 13:24:30.2200
+-- Generation Time: 2023-04-06 16:25:43.7680
 -- -------------------------------------------------------------
 
 
@@ -27,7 +27,7 @@ CREATE TABLE `cancelled_orders` (
   PRIMARY KEY (`id`),
   KEY `FKnscikbe458ds3du99x0ffe3e5` (`order_id`),
   CONSTRAINT `FKnscikbe458ds3du99x0ffe3e5` FOREIGN KEY (`order_id`) REFERENCES `orders` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 CREATE TABLE `discounts` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -38,16 +38,16 @@ CREATE TABLE `discounts` (
   `discount_value` decimal(7,2) NOT NULL,
   `updated_at` datetime(6) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=latin1;
 
 CREATE TABLE `order_items` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `created_at` datetime(6) DEFAULT NULL,
-  `discount_amount` decimal(7,2) DEFAULT NULL,
-  `final_amount` decimal(7,2) DEFAULT NULL,
-  `price` decimal(7,2) DEFAULT NULL,
+  `discount_amount` decimal(16,2) DEFAULT NULL,
+  `final_amount` decimal(16,2) DEFAULT NULL,
+  `price` decimal(16,2) DEFAULT NULL,
   `quantity` int(11) NOT NULL,
-  `total_amount` decimal(7,2) DEFAULT NULL,
+  `total_amount` decimal(16,2) DEFAULT NULL,
   `updated_at` datetime(6) DEFAULT NULL,
   `discount_id` bigint(20) DEFAULT NULL,
   `product_id` bigint(20) DEFAULT NULL,
@@ -59,21 +59,21 @@ CREATE TABLE `order_items` (
   CONSTRAINT `FK9cbujec8nd37w1mny5qar3uv8` FOREIGN KEY (`discount_id`) REFERENCES `discounts` (`id`),
   CONSTRAINT `FKbioxgbv59vetrxe0ejfubep1w` FOREIGN KEY (`order_id`) REFERENCES `orders` (`id`),
   CONSTRAINT `FKocimc7dtr037rh4ls4l95nlfi` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=latin1;
 
 CREATE TABLE `orders` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `created_at` datetime(6) DEFAULT NULL,
-  `discount_amount` decimal(7,2) DEFAULT NULL,
-  `final_amount` decimal(7,2) DEFAULT NULL,
-  `grand_total` decimal(7,2) DEFAULT NULL,
+  `discount_amount` decimal(16,2) DEFAULT NULL,
+  `final_amount` decimal(16,2) DEFAULT NULL,
+  `grand_total` decimal(16,2) DEFAULT NULL,
   `status` varchar(255) DEFAULT NULL,
   `updated_at` datetime(6) DEFAULT NULL,
   `user_id` bigint(20) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `FK32ql8ubntj5uh44ph9659tiih` (`user_id`),
   CONSTRAINT `FK32ql8ubntj5uh44ph9659tiih` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=latin1;
 
 CREATE TABLE `product_attributes` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -102,7 +102,7 @@ CREATE TABLE `product_inventories` (
 CREATE TABLE `product_prices` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `created_at` datetime(6) DEFAULT NULL,
-  `price` decimal(7,2) DEFAULT NULL,
+  `price` decimal(16,2) DEFAULT NULL,
   `updated_at` datetime(6) DEFAULT NULL,
   `product_id` bigint(20) DEFAULT NULL,
   PRIMARY KEY (`id`),
@@ -151,7 +151,7 @@ CREATE TABLE `shopping_cart_items` (
   CONSTRAINT `FK73tub1bs11btfwuxomhl5lhm9` FOREIGN KEY (`discount_id`) REFERENCES `discounts` (`id`),
   CONSTRAINT `FKbujx77cqv0w1v7v9cw6md956s` FOREIGN KEY (`shopping_cart_id`) REFERENCES `shopping_carts` (`id`),
   CONSTRAINT `FKgbo9dbc0drcea1m4u8112oxip` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=latin1;
 
 CREATE TABLE `shopping_carts` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -163,7 +163,7 @@ CREATE TABLE `shopping_carts` (
   PRIMARY KEY (`id`),
   KEY `FK3iw2988ea60alsp0gnvvyt744` (`user_id`),
   CONSTRAINT `FK3iw2988ea60alsp0gnvvyt744` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=latin1;
 
 CREATE TABLE `user_sessions` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -190,42 +190,59 @@ CREATE TABLE `users` (
   UNIQUE KEY `UK_6dotkott2kjsp8vw4d0m25fb7` (`email`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
 
-INSERT INTO `cancelled_orders` (`id`, `created_at`, `reason`, `updated_at`, `order_id`) VALUES
-(1, '2023-04-06 10:21:49.820314', 'Order delayed', '2023-04-06 10:21:49.820354', 1);
-
 INSERT INTO `discounts` (`id`, `active`, `created_at`, `discount_code`, `discount_type`, `discount_value`, `updated_at`) VALUES
-(1, 1, '2023-04-06 10:02:49.027182', 'FSZ-9GP-NSX-R', 'AMOUNT', 10.00, '2023-04-06 10:02:49.027210');
+(1, 0, '2023-04-06 12:45:29.884958', 'QH3-HC0-0J6-Y', 'PERCENT', 10.00, '2023-04-06 13:14:36.308440'),
+(2, 1, '2023-04-06 12:51:10.610543', 'YCI-4R0-64T-A', 'AMOUNT', 50.00, '2023-04-06 12:51:10.610614');
 
 INSERT INTO `order_items` (`id`, `created_at`, `discount_amount`, `final_amount`, `price`, `quantity`, `total_amount`, `updated_at`, `discount_id`, `product_id`, `order_id`) VALUES
-(1, '2023-04-06 10:20:22.436494', 170.00, 14280.00, 850.00, 17, 14450.00, '2023-04-06 10:20:22.436504', 1, 1, 1);
+(1, '2023-04-06 12:48:58.182018', 20400.00, 183600.00, 850.00, 240, 204000.00, '2023-04-06 12:48:58.182025', 1, 1, 1),
+(2, '2023-04-06 12:58:46.721047', 17000.00, 153000.00, 850.00, 200, 170000.00, '2023-04-06 12:58:46.721053', 1, 1, 2),
+(3, '2023-04-06 12:58:46.723163', 10000.00, 160000.00, 850.00, 200, 170000.00, '2023-04-06 12:58:46.723167', 2, 1, 2),
+(4, '2023-04-06 13:01:29.567829', 17000.00, 153000.00, 850.00, 200, 170000.00, '2023-04-06 13:01:29.567837', 1, 1, 3),
+(5, '2023-04-06 13:01:29.570369', 10000.00, 160000.00, 850.00, 200, 170000.00, '2023-04-06 13:01:29.570376', 2, 1, 3),
+(6, '2023-04-06 13:04:59.101000', 17000.00, 153000.00, 850.00, 200, 170000.00, '2023-04-06 13:04:59.101007', 1, 1, 4),
+(7, '2023-04-06 13:04:59.104237', 10000.00, 160000.00, 850.00, 200, 170000.00, '2023-04-06 13:04:59.104242', 2, 1, 4),
+(8, '2023-04-06 13:15:59.474406', NULL, 170000.00, 850.00, 200, 170000.00, '2023-04-06 13:15:59.474412', NULL, 1, 5),
+(9, '2023-04-06 13:15:59.477708', 12500.00, 200000.00, 850.00, 250, 212500.00, '2023-04-06 13:15:59.477713', 2, 1, 5);
 
 INSERT INTO `orders` (`id`, `created_at`, `discount_amount`, `final_amount`, `grand_total`, `status`, `updated_at`, `user_id`) VALUES
-(1, '2023-04-06 10:20:22.431934', 170.00, 14280.00, 14450.00, 'CREATED', '2023-04-06 10:20:22.443051', 1);
+(1, '2023-04-06 12:48:58.178655', 20400.00, 183600.00, 204000.00, 'CREATED', '2023-04-06 12:48:58.193491', 1),
+(2, '2023-04-06 12:58:46.717287', 27000.00, 313000.00, 340000.00, 'CREATED', '2023-04-06 12:58:46.734883', 1),
+(3, '2023-04-06 13:01:29.563909', 27000.00, 313000.00, 340000.00, 'CREATED', '2023-04-06 13:01:29.585930', 1),
+(4, '2023-04-06 13:04:59.091831', 27000.00, 313000.00, 340000.00, 'CREATED', '2023-04-06 13:04:59.108059', 1),
+(5, '2023-04-06 13:15:59.465389', 12500.00, 370000.00, 382500.00, 'CREATED', '2023-04-06 13:15:59.482262', 1);
 
 INSERT INTO `product_attributes` (`id`, `attribute_key`, `attribute_value`, `created_at`, `updated_at`, `product_id`) VALUES
-(1, 'RAM', '16GB', '2023-04-06 10:01:12.170183', '2023-04-06 10:01:12.170188', 1),
-(2, 'Storage', '512GB', '2023-04-06 10:01:12.172981', '2023-04-06 10:01:12.172985', 1);
+(1, 'RAM', '40GB', '2023-04-06 12:42:35.955010', '2023-04-06 12:42:35.955017', 1),
+(2, 'Storage', '512GB', '2023-04-06 12:42:35.958699', '2023-04-06 12:42:35.958705', 1);
 
 INSERT INTO `product_inventories` (`id`, `created_at`, `quantity`, `reorder_level`, `updated_at`, `product_id`) VALUES
-(1, '2023-04-06 10:01:12.137350', 589260, 100, '2023-04-06 10:04:12.899325', 1);
+(1, '2023-04-06 12:42:35.900311', 22670, 2000, '2023-04-06 13:15:59.418675', 1);
 
 INSERT INTO `product_prices` (`id`, `created_at`, `price`, `updated_at`, `product_id`) VALUES
-(1, '2023-04-06 10:01:12.151107', 850.00, '2023-04-06 10:04:43.798744', 1);
+(1, '2023-04-06 12:42:35.930650', 850.00, '2023-04-06 12:44:53.004220', 1);
 
 INSERT INTO `products` (`id`, `created_at`, `description`, `image`, `name`, `product_code`, `updated_at`, `product_inventory_id`, `product_price_id`) VALUES
-(1, '2023-04-06 10:01:12.165554', 'Lenovo 2023 ThinkPad E15 Gen 4 High Performance Business Laptop: AMD Ryzen 5 5625U Hex-Core, 40GB RAM, 1TB NVMe SSD, 15.6 FHD 1920x1080 IPS Display, Win 10 Pro, Silver', 'https://www.amazon.com/Lenovo-ThinkPad-Performance-Business-Laptop', 'Lenovo 2023 ThinkPad E15', 'W1O3-83GT-MY', '2023-04-06 10:01:12.165561', 1, 1);
+(1, '2023-04-06 12:42:35.947535', 'Lenovo 2023 ThinkPad E15 Gen 4 High Performance Business Laptop: AMD Ryzen 5 5625U Hex-Core, 40GB RAM,', 'https://www.amazon.com/Lenovo-ThinkPad-Performance-Business-Laptop', 'Lenovo 2023 ThinkPad E15', '1BV4-V1KZ-IH', '2023-04-06 12:42:35.947559', 1, 1);
 
 INSERT INTO `shopping_cart_items` (`id`, `created_at`, `quantity`, `updated_at`, `discount_id`, `product_id`, `shopping_cart_id`) VALUES
-(2, '2023-04-06 10:18:05.939747', 17, '2023-04-06 10:18:05.939768', 1, 1, 1);
+(1, '2023-04-06 12:46:31.545607', 240, '2023-04-06 12:46:31.545612', 1, 1, 1),
+(2, '2023-04-06 12:52:03.801245', 200, '2023-04-06 12:52:03.801269', 2, 1, 1),
+(3, '2023-04-06 12:57:59.815488', 200, '2023-04-06 12:57:59.815495', 1, 1, 2),
+(4, '2023-04-06 12:58:11.435820', 200, '2023-04-06 12:58:11.435833', 2, 1, 2),
+(5, '2023-04-06 13:09:16.388286', 200, '2023-04-06 13:09:16.388292', 1, 1, 3),
+(6, '2023-04-06 13:09:36.653724', 250, '2023-04-06 13:09:36.653734', 2, 1, 3);
 
 INSERT INTO `shopping_carts` (`id`, `created_at`, `expires_at`, `status`, `updated_at`, `user_id`) VALUES
-(1, '2023-04-06 10:11:54.543364', '2023-04-07 10:18:05.903336', 'ACTIVE', '2023-04-06 10:20:22.441614', 1);
+(1, '2023-04-06 12:46:31.542697', '2023-04-07 12:52:03.765893', 'CHECKOUT', '2023-04-06 12:54:23.518460', 1),
+(2, '2023-04-06 12:57:59.800595', '2023-04-07 12:58:11.313403', 'CHECKOUT', '2023-04-06 13:04:59.174438', 1),
+(3, '2023-04-06 13:09:16.373812', '2023-04-07 13:09:36.609249', 'ACTIVE', '2023-04-06 13:09:36.663234', 1);
 
 INSERT INTO `user_sessions` (`id`, `created_at`, `expires_at`, `token`, `updated_at`, `user_id`) VALUES
-(1, '2023-04-06 10:09:14.080022', '2023-04-07 10:09:13.986580', 'eyJhbGciOiJIUzUxMiJ9.eyJleHAiOjE2ODA4NjIxNTMsInVzZXJJZCI6MSwiaWF0IjoxNjgwNzc1NzUzfQ.ALjf8xnQyX7uzilw3o85iP_noeNoThoydBl7KWn4PErTKHzq82yDionJ2KwTiioHINIDnErAWVjDX7UwsXlcMw', '2023-04-06 10:09:14.080045', 1);
+(1, '2023-04-06 12:39:17.664681', '2023-04-07 12:39:17.540242', 'eyJhbGciOiJIUzUxMiJ9.eyJleHAiOjE2ODA4NzExNTcsInVzZXJJZCI6MSwiaWF0IjoxNjgwNzg0NzU3fQ.KlQtq79-3mZvcME1PzW6ngUjjgCiYCrKKRKQMsVjDPTmU3AZ-MC7jHPjTGFkOwdTTIkwYWUx5IJFVAl2_V4KgQ', '2023-04-06 12:39:17.664691', 1);
 
 INSERT INTO `users` (`id`, `created_at`, `email`, `first_name`, `last_name`, `password`, `phone_number`, `updated_at`) VALUES
-(1, '2023-04-06 10:00:33.168719', 'cretus@gmail.com', 'cillum eiusmod', 'minimum', '$2a$10$aeT.MPwJlH4uOx9bX2yENOP.SeiOCq7l1mGMtrJnCarjG1mlj8W2q', '+255757807834', '2023-04-06 10:00:33.168751');
+(1, '2023-04-06 12:38:51.907369', 'cretus@gmail.com', 'dolore aliquip aliqua', 'veniam proident', '$2a$10$LclHasFlJFQE.CZqR0A.XO0Ypu/pRZBqp3d/gLY2wBGVW6kH74l7O', 'voluptate laborum sit', '2023-04-06 12:38:51.907393');
 
 
 
