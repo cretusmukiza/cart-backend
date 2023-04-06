@@ -23,27 +23,27 @@ public class OrderItem {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToOne(cascade = CascadeType.MERGE)
+    @OneToOne(cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
     @JoinColumn(name = "product_id", referencedColumnName = "id")
     private Product product;
 
-    @OneToOne(cascade = CascadeType.MERGE)
+    @OneToOne(cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
     @JoinColumn(name = "discount_id", referencedColumnName = "id", nullable = true)
     private Discount discount;
 
-    @Column(precision = 7, scale = 2)
+    @Column(precision = 16, scale = 2)
     private BigDecimal price;
 
     @Column(nullable = false)
     private Integer quantity;
 
-    @Column(precision = 7, scale = 2)
+    @Column(precision = 16, scale = 2)
     private BigDecimal totalAmount;
 
-    @Column(precision = 7, scale = 2)
+    @Column(precision = 16, scale = 2)
     private BigDecimal discountAmount;
 
-    @Column(precision = 7, scale = 2)
+    @Column(precision = 16, scale = 2)
     private BigDecimal finalAmount;
 
     @Column(name = "created_at")

@@ -202,7 +202,7 @@ public class ProductService extends RetailServiceGrpc.RetailServiceImplBase {
         Optional<Discount> discountOptional = this.discountRepository.findById(request.getDiscountId());
         if(discountOptional.isPresent()){
             Discount discount = discountOptional.get();
-            discount.setActive(true);
+            discount.setActive(false);
             this.discountRepository.save(discount);
             builder.setSuccess(true);
         }

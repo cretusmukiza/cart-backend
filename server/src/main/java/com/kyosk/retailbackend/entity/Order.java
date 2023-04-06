@@ -32,13 +32,13 @@ public class Order {
     @JoinColumn(name="order_id")
     private List<OrderItem> orderItemList;
 
-    @Column(precision = 7, scale = 2)
+    @Column(precision = 16, scale = 2)
     private BigDecimal grandTotal;
 
-    @Column(precision = 7, scale = 2)
+    @Column(precision = 16, scale = 2)
     private BigDecimal discountAmount;
 
-    @Column(precision = 7, scale = 2)
+    @Column(precision = 16, scale = 2)
     private BigDecimal finalAmount;
 
     @Enumerated(EnumType.STRING)
