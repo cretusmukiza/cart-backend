@@ -17,7 +17,7 @@ For building and running the application you need:
 
 ## API Documentation(Postman Collection)
 To view the API documentation add the API definition in your postman
-- https://blue-space-373658.postman.co/workspace/Shopping-Backend-Workspace~74533349-e60f-4d2a-907d-cb3067ed195e/api/e0c66933-f86c-470a-9d21-91f607372aa5
+- https://www.postman.com/blue-space-373658/workspace/shopping-api/collection/642f9d520b475125d27df09d
 
 ## Running the application locally
 There are several ways to run this application locally you need
@@ -37,6 +37,7 @@ mvn install
 ```shell
 mvn package
 ```
+- You can also use build  image for this project ``troy12/app-retail-backend``
 - The project has docker-compose setup with the application and MYSQL database.
   To start the app on the local environment run the command
 ```shell
@@ -44,12 +45,14 @@ docker-compose up --build
 ```
 - The app will start on port 9090 add the postman collection, import the api definition and
 test the app on localhost:9090.
+- Change the ``SERVER_URL`` to reflect the your set port and host
 - Use the use example message button to generate sample message and replace the generate values
  with relevant values for given fields.
 - All the methods in the CartService are limited to authorized users.
 - To use them first register the user using the AuthService ``createUser`` method.
 - Use the register credential to get the token using AuthService ``authorizeUser`` method.
-- Pass the token in the metadata with the key ``client-token``
+- Set the editor environment to ``Test Environment``
+- Edit the ``TOKEN`` set it to the value returned by ``authorizeUser`` method
 - The rest of the methods are not authorized  were meant for admin are meant to be deployed as internal APIs.
 
 ## Running the test
