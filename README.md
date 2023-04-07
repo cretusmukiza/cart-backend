@@ -52,6 +52,12 @@ test the app on localhost:9090.
 - Pass the token in the metadata with the key ``client-token``
 - The rest of the methods are not authorized  were meant for admin are meant to be deployed as internal APIs.
 
+## Running the test
+To run the test run the command
+```shell
+mvn test
+```
+
 
 ## Deploying the application to kubernetes
 
