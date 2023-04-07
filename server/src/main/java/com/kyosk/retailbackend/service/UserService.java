@@ -2,19 +2,20 @@ package com.kyosk.retailbackend.service;
 
 import com.kyosk.retailbackend.*;
 import com.kyosk.retailbackend.entity.User;
-import com.kyosk.retailbackend.repository.DiscountRepository;
 import com.kyosk.retailbackend.repository.UserRepository;
 import com.kyosk.retailbackend.utils.BcryptGenerator;
 import com.kyosk.retailbackend.utils.JwtUtil;
 import com.kyosk.retailbackend.utils.TimeUtils;
 import io.grpc.Status;
 import io.grpc.stub.StreamObserver;
+import lombok.AllArgsConstructor;
 import net.devh.boot.grpc.server.service.GrpcService;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Optional;
 
 @GrpcService
+@AllArgsConstructor
 public class UserService extends UserServiceGrpc.UserServiceImplBase {
 
     @Autowired
@@ -28,9 +29,6 @@ public class UserService extends UserServiceGrpc.UserServiceImplBase {
 
     @Autowired
     private JwtUtil jwtUtil;
-
-    @Autowired
-    private DiscountRepository discountRepository;
 
     @Override
     public void createUser(CreateUserRequest request, StreamObserver<CreateUserResponse> responseObserver) {
