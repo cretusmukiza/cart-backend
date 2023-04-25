@@ -1,7 +1,7 @@
 syntax = "proto3";
 
 option java_multiple_files = true;
-option java_package = "com.kyosk.retailbackend";
+option java_package = "com.cretus.retailbackend";
 
 import "google/protobuf/timestamp.proto";
 
